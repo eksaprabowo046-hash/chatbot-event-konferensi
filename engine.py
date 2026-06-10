@@ -8,37 +8,49 @@ class EventChatbotEngine:
                 "price": 150000,
                 "emoji": "🎤",
                 "desc": "Seminar 1 hari, termasuk materi & sertifikat",
-                "capacity": 200
+                "capacity": 200,
+                "status": "berlangsung",
+                "date": "25 Oct 2024"
             },
             "workshop": {
                 "price": 350000,
                 "emoji": "🛠️",
                 "desc": "Workshop intensif 2 hari, praktek langsung",
-                "capacity": 50
+                "capacity": 50,
+                "status": "berlangsung",
+                "date": "10-11 Nov 2024"
             },
             "konferensi": {
                 "price": 500000,
                 "emoji": "🏛️",
                 "desc": "Konferensi internasional 3 hari, full-board",
-                "capacity": 500
+                "capacity": 500,
+                "status": "berlangsung",
+                "date": "15-17 Dec 2024"
             },
             "webinar": {
                 "price": 75000,
                 "emoji": "💻",
                 "desc": "Webinar online via Zoom, akses rekaman selamanya",
-                "capacity": 1000
+                "capacity": 1000,
+                "status": "terlaksana",
+                "date": "01 Sep 2024"
             },
             "gala_dinner": {
                 "price": 250000,
                 "emoji": "🍽️",
                 "desc": "Malam gala dinner networking eksklusif",
-                "capacity": 100
+                "capacity": 100,
+                "status": "terlaksana",
+                "date": "15 Aug 2024"
             },
             "bootcamp": {
                 "price": 750000,
                 "emoji": "🚀",
                 "desc": "Bootcamp intensif 5 hari, proyek nyata",
-                "capacity": 30
+                "capacity": 30,
+                "status": "berlangsung",
+                "date": "01-05 Nov 2024"
             },
         }
 
@@ -131,6 +143,10 @@ class EventChatbotEngine:
 
     def detect_intent(self, text):
         text = text.lower()
+        if re.search(r"\b(sedang berlangsung|berjalan|aktif|sekarang)\b", text):
+            return "ASK_ONGOING"
+        if re.search(r"\b(terlaksana|selesai|lampau|kemarin|lewat)\b", text):
+            return "ASK_PAST"
         if re.search(r"\b(reset|ulang)\b", text):
             return "RESET"
         if re.search(self.re_cancel_all, text):

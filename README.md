@@ -1,17 +1,19 @@
-# 🎪 EventPro — Chatbot Manajemen Event & Konferensi
+# 🎪 EventPro Concierge — Premium Event Management System
 
-Chatbot berbasis **Finite State Automata (FSA)** untuk sistem registrasi event dan konferensi, dibangun menggunakan Python dan Streamlit.
+![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)
+![Streamlit](https://img.shields.io/badge/Streamlit-1.31+-FF4B4B.svg)
+![Status](https://img.shields.io/badge/Status-Premium_Version-gold.svg)
+
+Sistem Manajemen Event cerdas dengan antarmuka **Conversational UI** berbasis **Finite State Automata (FSA)**. Proyek ini menggabungkan NLP Engine kustom untuk memproses pendaftaran event, seminar, dan konferensi secara natural.
 
 ## Fitur
-- 🤖 Chatbot interaktif berbasis FSM (3 state: REGISTERING → CONFIRMING → COMPLETED)
-- 🎪 6 paket event: Seminar, Workshop, Konferensi, Webinar, Gala Dinner, Bootcamp
-- 🛒 Keranjang pendaftaran dinamis (tambah/hapus tiket)
-- 💰 Kalkulasi total pembayaran otomatis
-- 📋 Katalog event lengkap dengan info kapasitas & harga
-- 🔄 NLP Engine dengan regex untuk deteksi intent dan parsing pesanan
+- 🤖 **Hybrid Conversational UI**: Seluruh alur pendaftaran, pemilihan paket, hingga pengisian form dilakukan di dalam satu jendela chat yang elegan.
+- ⚙️ **FSM Architecture**: Logika state machine yang solid (REGISTERING, CONFIRMING, COMPLETED) untuk memastikan alur data yang akurat.
+- 📊 **In-Chat Dashboard**: Visualisasi statistik pendaftaran dan status sistem yang muncul secara dinamis lewat perintah chat.
+- 🛒 **Dynamic Smart Cart**: Mendukung pemrosesan bahasa alami untuk menambah atau mengurangi tiket (contoh: *"tambah 2 workshop dan batalkan seminar"*).
+- 📝 **Embedded Smart Form**: Integrasi form identitas yang muncul secara otomatis setelah konfirmasi reservasi.
 
 ## Cara Menjalankan
-
 ```bash
 pip install -r requirements.txt
 streamlit run app.py

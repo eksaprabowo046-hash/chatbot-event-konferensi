@@ -45,10 +45,9 @@ class EventFSM:
         if prompt is None:
             self.state = BotState.REGISTERING
             self.response = (
-                "Selamat datang di **EventPro Bot** 🎉\n\n"
-                "Saya siap membantu Anda mendaftar ke event & konferensi pilihan.\n"
-                "Ketik **'paket'** untuk melihat daftar event yang tersedia, "
-                "atau langsung ketik nama event yang ingin Anda ikuti!"
+                "Selamat datang di layanan reservasi **EventPro Premium** 🎉\n\n"
+                "Saya adalah asisten virtual Anda yang akan memandu proses pendaftaran event dan konferensi eksklusif kami.\n\n"
+                "Bagaimana saya bisa membantu Anda hari ini? Anda dapat mengetikkan **'paket'** untuk melihat katalog kami atau menanyakan status acara tertentu."
             )
             return
 
@@ -65,38 +64,54 @@ class EventFSM:
                 self.cart_dict = {}
                 self.state = BotState.REGISTERING
                 self.response = (
-                    "Sistem telah direset. ♻️\n"
-                    "Silakan mulai pendaftaran baru! Ketik **'paket'** untuk melihat pilihan event."
+                    "Tentu, saya telah mereset sesi pendaftaran Anda. ♻️\n"
+                    "Mari kita mulai kembali dari awal. Ada paket event yang ingin Anda jelajahi?"
                 )
 
             elif intent == "CANCEL_ALL":
                 self.cart_dict = {}
-                self.response = "🗑️ Semua pilihan event telah dihapus dari keranjang. Mau mendaftar event lain?"
+                self.response = "Baik, saya telah mengosongkan keranjang pendaftaran Anda. Apakah ada kategori acara lain yang menarik perhatian Anda?"
+
+            elif intent == "ASK_ONGOING":
+                ongoing = [v for k, v in self.nlp.menu_data.items() if v['status'] == 'berlangsung']
+                lines = ["🌟 **Berikut adalah daftar acara yang sedang atau akan segera berlangsung:**\n"]
+                for item in ongoing:
+                    lines.append(f"- {item['emoji']} **{item['desc'].split(',')[0]}** ({item['date']})")
+                lines.append("\nApakah ada salah satu dari acara di atas yang ingin Anda ikuti?")
+                self.response = "\n".join(lines)
+
+            elif intent == "ASK_PAST":
+                past = [v for k, v in self.nlp.menu_data.items() if v['status'] == 'terlaksana']
+                lines = ["📚 **Acara-acara menarik yang telah sukses kami laksanakan:**\n"]
+                for item in past:
+                    lines.append(f"- {item['emoji']} **{item['desc'].split(',')[0]}** (Selesai pada {item['date']})")
+                lines.append("\nNantikan kembali kehadiran acara-acara serupa di masa mendatang!")
+                self.response = "\n".join(lines)
 
             elif intent == "ASK_MENU":
-                lines = ["Berikut adalah **daftar paket event** yang tersedia:\n"]
+                lines = ["Tentu, ini adalah **Katalog Event Eksklusif** kami saat ini:\n"]
                 for key, val in self.nlp.menu_data.items():
                     lines.append(
                         f"- {val['emoji']} **{key.replace('_', ' ').title()}** "
                         f"— Rp {val['price']:,} | Kapasitas: {val['capacity']} peserta\n"
                         f"  _{val['desc']}_"
                     )
-                lines.append("\nSilakan ketik nama event untuk mendaftar, contoh: *'daftar 2 workshop'*")
+                lines.append("\nSilakan sebutkan nama event dan jumlah tiket yang Anda inginkan, misalnya: *'Daftar 2 tiket konferensi'*")
                 self.response = "\n".join(lines)
 
             elif intent == "CHECKOUT":
                 if not self.cart_dict:
-                    self.response = "❗ Anda belum memilih event apapun. Ketik **'paket'** untuk melihat daftar event."
+                    self.response = "Mohon maaf, sepertinya Anda belum memilih event. Bolehkah saya membantu Anda memilih salah satu paket yang tersedia?"
                 else:
                     self.state = BotState.CONFIRMING
-                    lines = ["📋 **Ringkasan Pendaftaran Anda:**\n"]
+                    lines = ["📋 **Berikut adalah Ringkasan Reservasi Anda:**\n"]
                     total = 0
                     for i, (key, qty) in enumerate(self.cart_dict.items()):
                         val = self.nlp.menu_data[key]
                         subtotal = val["price"] * qty
                         total += subtotal
                         lines.append(
-                            f"**{i+1}. {val['emoji']} {key.replace('_', ' ').title()}** "
+                            f"**{val['emoji']} {key.replace('_', ' ').title()}** "
                             f"({qty} tiket) = Rp {subtotal:,}"
                         )
                     lines.append(f"\n💰 **Total Pembayaran: Rp {total:,}**")
@@ -116,18 +131,17 @@ class EventFSM:
                     msgs = []
                     for p in added:
                         name = p["item"].replace("_", " ").title()
-                        msgs.append(f"✅ **{p['qty']} tiket {name}** berhasil ditambahkan.")
+                        msgs.append(f"✅ Baik, **{p['qty']} tiket {name}** telah saya tambahkan ke daftar Anda.")
                     for p in removed:
                         name = p["item"].replace("_", " ").title()
-                        msgs.append(f"🗑️ **{p['qty']} tiket {name}** berhasil dihapus.")
+                        msgs.append(f"🗑️ Tentu, **{p['qty']} tiket {name}** telah saya hapus dari daftar.")
 
-                    msgs.append("Ada lagi? Ketik **'checkout'** / **'bayar'** untuk melanjutkan pembayaran.")
+                    msgs.append("\nApakah masih ada event lain yang ingin Anda tambahkan, atau kita bisa lanjut ke tahap konfirmasi?")
                     self.response = "\n".join(msgs)
                 else:
                     self.response = (
-                        "Maaf, saya tidak mengerti. 🤔\n"
-                        "Ketik **'paket'** untuk melihat daftar event, "
-                        "atau contoh: *'daftar 1 konferensi dan 2 webinar'*"
+                        "Mohon maaf, saya kurang memahami permintaan tersebut. 🤔\n"
+                        "Bisa tolong diulangi? Anda bisa menanyakan daftar 'paket' atau langsung menyebutkan nama event yang diinginkan."
                     )
 
         elif self.state == BotState.CONFIRMING:
@@ -144,18 +158,18 @@ class EventFSM:
                     for k, q in self.cart_dict.items()
                 )
                 self.response = (
-                    f"🎉 **Pendaftaran Berhasil! Selamat bergabung!**\n\n"
-                    f"📌 Event yang didaftarkan: {items_str}\n"
-                    f"💰 Total yang harus dibayar: **Rp {total:,}**\n\n"
-                    f"Silakan lakukan pembayaran di loket atau transfer ke rekening resmi kami.\n"
-                    f"E-tiket akan dikirimkan ke email Anda dalam 1x24 jam. ✉️"
+                    f"🎉 **Reservasi Anda Telah Berhasil Dikonfirmasi!**\n\n"
+                    f"Terima kasih telah mempercayakan pengalaman belajar Anda kepada kami.\n"
+                    f"📌 **Detail Event:** {items_str}\n"
+                    f"💰 **Total Pembayaran:** **Rp {total:,}**\n\n"
+                    f"Mohon lengkapi data diri Anda pada form yang tersedia. Instruksi pembayaran dan E-tiket akan segera kami kirimkan melalui email resmi. ✉️"
                 )
 
             elif intent == "NO" or prompt_lower in ["tidak", "no", "batal", "salah", "enggak", "cancel"]:
                 self.state = BotState.REGISTERING
                 self.response = (
-                    "❌ Pendaftaran dibatalkan.\n"
-                    "Anda dapat mengedit pilihan event atau ketik **'paket'** untuk memulai ulang."
+                    "Baik, pendaftaran telah saya tunda.\n"
+                    "Silakan tinjau kembali pilihan Anda atau tanyakan paket lain jika ada yang lebih sesuai."
                 )
 
             else:

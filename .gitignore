@@ -1,10 +1,13 @@
+# Python bytecode
 __pycache__/
-*.pyc
-*.pyo
-.env
-.venv/
+*.py[cod]
+*$py.class
+
+# Environments
+.venv
+env/
 venv/
-*.egg-info/
-dist/
-build/
-.DS_Store
+ENV/
+
+# Streamlit
+.streamlit/
